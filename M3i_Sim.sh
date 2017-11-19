@@ -38,16 +38,50 @@ function set_broadcast {
     hcitool -i hci0 cmd 0x08 0x0008 1C 03 09 4D 33 02 01 04 14 FF 02 01 $MAJOR $MINOR $DATATYPE $BIKEID $RPM $HR $POWER $KCAL $MINUTES $SECS $TRIP $GEAR > /dev/null;
 }
 
+function set_broadcast_id {
+    hcitool -i hci0 cmd 0x08 0x0008 1C 03 09 4D 33 02 01 04 14 FF 02 01 $MAJOR $MINOR $DATATYPE $1 $RPM $HR $POWER $KCAL $MINUTES $SECS $TRIP $GEAR > /dev/null;
+}
+
+function set_broadcast_id_power_rpm_gear {
+
+    echo "KEISER id:"+$1+" power:"+$2+" rpm:"+$3+" gear:"+$4 
+
+    #hcitool -i hci0 cmd 0x08 0x0008 1C 03 09 4D 33 02 01 04 14 FF 02 01 $MAJOR $MINOR $DATATYPE $1 $3 $HR $2 $KCAL $MINUTES $SECS $TRIP $4 > /dev/null;
+}
+
 function run {
     init
-    while true; do
-        sleep 1.99
+    while true; do        
+        #sleep 1.99
+        sleep 0.99
+
+        BIKEID=$[$BIKEID + 1]
+        if [ "$BIKEID" -ge 40 ]; then
+            BIKEID=0;
+        fi
+        POWER="$(printf "%02x" $BIKEID) 00"
+
+
         DECPOWER=$[$DECPOWER + 2]
         if [ "$DECPOWER" -ge 255 ]; then
             DECPOWER=0;
         fi
         POWER="$(printf "%02x" $DECPOWER) 00"
-        set_broadcast
+       
+        number = $[ ( RANDOM % 10 )  + 1 ]
+        GEAR = let b+=$number
+        echo $GEAR
+
+        #!/bin/bash
+        #for i in {1..5}
+        #do
+         
+            #set_broadcast
+            #set_broadcast_id $BIKEID
+            set_broadcast_id_power_rpm_gear $BIKEID $POWER $RPM $GEAR
+
+        #done
+
     done
 }
 

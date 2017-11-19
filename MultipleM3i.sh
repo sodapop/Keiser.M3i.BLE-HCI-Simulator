@@ -43,7 +43,21 @@ function set_broadcast {
 	while [ $COUNTER -lt $HCICOUNT ]; do
 		HCIDEVICE="hci$COUNTER";
 		BIKEID="0$COUNTER";
+
+		#To generate in the range: {0,..,9}
+
+		gear=$(( $RANDOM % 10 )); #echo "gear : "$gear
+
+		#To generate in the range: {40,..,49}
+
+		power=$(( $RANDOM % 90 + 340 )); #echo $power "W"		
+        
+        #GEAR = let b+=$number
+        #echo $GEAR
+
 		hcitool -i $HCIDEVICE cmd 0x08 0x0008 1C 03 09 4D 33 02 01 04 14 FF 02 01 $MAJOR $MINOR $DATATYPE $BIKEID $RPM $HR $POWER $KCAL $MINUTES $SECS $TRIP $GEAR > /dev/null;
+
+		echo $HCIDEVICE "Bike:"$BIKEID " gear:"$gear " power:"$power
 		let COUNTER=COUNTER+1;
 	done
 }
