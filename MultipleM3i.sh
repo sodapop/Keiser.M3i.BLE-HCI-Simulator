@@ -6,6 +6,8 @@
 # signals at an unrealistic interval.
 # --------------------------------------------------------
 
+
+
 RATE="A0 00" # 100ms
 
 MAJOR="06"
@@ -20,7 +22,7 @@ SECS="00"
 TRIP="00 00"
 GEAR="01"
 
-HCICOUNT=7;
+HCICOUNT=40;
 
 DECPOWER=0
 
@@ -41,36 +43,28 @@ function init {
 function set_broadcast {
 	COUNTER=0
 	while [ $COUNTER -lt $HCICOUNT ]; do
+		sleep .1
 		HCIDEVICE="hci$COUNTER";
-		BIKEID="0$COUNTER";
+		BIKEID="$COUNTER";
 
 		#To generate in the range: {0,..,9}
+		GEAR=$(( $RANDOM % 10 ));
 
-		gear=$(( $RANDOM % 10 )); #echo "gear : "$gear
-
-		#To generate in the range: {40,..,49}
-
-		power=$(( $RANDOM % 90 + 340 )); #echo $power "W"		
-        
-        #GEAR = let b+=$number
-        #echo $GEAR
-
+		#To generate in the range: {90,..,90+300}
+		POWER=$(( $RANDOM % 300 + 90 ));		
+		
 		hcitool -i $HCIDEVICE cmd 0x08 0x0008 1C 03 09 4D 33 02 01 04 14 FF 02 01 $MAJOR $MINOR $DATATYPE $BIKEID $RPM $HR $POWER $KCAL $MINUTES $SECS $TRIP $GEAR > /dev/null;
 
-		echo $HCIDEVICE "Bike:"$BIKEID " gear:"$gear " power:"$power
+		echo $HCIDEVICE "Bike:"$BIKEID " gear:"$GEAR " power:"$POWER"W"
 		let COUNTER=COUNTER+1;
 	done
 }
 
+
 function run {
     init
     while true; do
-        sleep .500
-        DECPOWER=$[$DECPOWER + 2]
-        if [ $DECPOWER -ge 255 ]; then
-            DECPOWER=0;
-        fi
-        POWER="$(printf "%02x" $DECPOWER) 00"
+        sleep .10
         set_broadcast
     done
 }
