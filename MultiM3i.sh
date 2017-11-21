@@ -22,11 +22,13 @@ SECS="00"
 TRIP="00 00"
 GEAR="01"
 
-HCICOUNT=1;
+HCICOUNT=36;
+
 
 DECPOWER=0
 
-MAXBIKES=20;
+MAXBIKES=36;
+
 
 function init {
 	COUNTER=0
@@ -45,9 +47,17 @@ function init {
 function set_broadcast {
 	COUNTER=0
 	while [ $COUNTER -lt $MAXBIKES ]; do
-		sleep .9
-		#HCIDEVICE="hci$COUNTER";
+		sleep .15
+		
+		if [ $((COUNTER%2)) -eq 0 ]; then
+			HCIDEVICE="hci1";
+		else
+			HCIDEVICE="hci2";
+		fi
 
+		#HCIDEVICE="hci$COUNTER";
+		#HCIDVICE="hci1";
+		
 		BIKEID="$COUNTER";
 
 
@@ -76,8 +86,8 @@ function set_broadcast {
 function run {
     init
     while true; do
-        sleep .5
-        set_broadcast
+        	sleep .2
+        	set_broadcast
     done
 }
 
