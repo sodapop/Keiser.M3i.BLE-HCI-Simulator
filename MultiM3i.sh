@@ -22,7 +22,7 @@ SECS="00"
 TRIP="00 00"
 GEAR="01"
 
-HCICOUNT=36;
+HCICOUNT=3;
 
 
 DECPOWER=0
@@ -61,22 +61,38 @@ function set_broadcast {
 		BIKEID="$COUNTER";
 
 
-		BIKEID_hex=`printf "%02X\n" $COUNTER`;
+		BIKEID_hex=`printf "%02X" $COUNTER`;
 
 		#To generate in the range: {0,..,9}
 		GEAR=$(( $RANDOM % 10 ));
-		GEAR_hex=`printf "%02X\n" $GEAR`;
+		GEAR_hex=`printf "%02X" $GEAR`;
 
 
 		#To generate in the range: {90,..,90+100}
 		POWER=$(( $RANDOM % 100 + 90 ));		
-		POWER_hex=`printf "%04X\n" $POWER`;
-	
+		POWER_hex=`printf "%04X" $POWER`;
+		#echo $POWER_hex;
+		POWER_hex=`printf $POWER_hex | sed 's/../& /g'`;
+		#echo "POWER: "$POWER " - " $POWER_hex;
 
-		hcitool -i $HCIDEVICE cmd 0x08 0x0008 1C 03 09 4D 33 02 01 04 14 FF 02 01 $MAJOR $MINOR $DATATYPE $BIKEID_hex $RPM $HR $POWER_hex $KCAL $MINUTES $SECS $TRIP $GEAR_hex > /dev/null;
+		powerArray=($POWER_hex);
+		#echo ${powerArray[0]};
+		#echo ${powerArray[1]};
+
+		RPM=$(( $RANDOM % 100 + 60 ));
+		RPM_hex=`printf "%04X" $RPM`;
+		RPM_hex=`printf $RPM_hex | sed 's/../& /g'`;
+		#echo $RPM_hex;
+
+		rpmArray=($RPM_hex);
+		#echo ${rpmArray[0]};
+		#echo ${rpmArray[1]};
+
+
+		hcitool -i $HCIDEVICE cmd 0x08 0x0008 1C 03 09 4D 33 02 01 04 14 FF 02 01 $MAJOR $MINOR $DATATYPE $BIKEID_hex ${rpmArray[1]} ${rpmArray[0]} $HR ${powerArray[1]} ${powerArray[0]} $KCAL $MINUTES $SECS $TRIP $GEAR_hex > /dev/null;
 
 	
-		echo $HCIDEVICE "Bike:"$BIKEID $BIKEID_hex " gear:"$GEAR $GEAR_hex " power:"$POWER"W" $POWER_hex;
+		echo $HCIDEVICE "Bike:"$BIKEID $BIKEID_hex " gear:"$GEAR $GEAR_hex " power:"$POWER"W" $POWER_hex " RPM:"$RPM $RPM_hex ;
 
 		let COUNTER=COUNTER+1;
 	done
