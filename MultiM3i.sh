@@ -11,7 +11,7 @@
 RATE="A0 00" # 100ms
 
 MAJOR="06"
-MINOR="24"
+MINOR="21"
 DATATYPE="00"
 RPM="00 00"
 HR="00 00"
@@ -45,9 +45,9 @@ function init {
 }
 
 function set_broadcast {
-	COUNTER=0
+	COUNTER=1
 	while [ $COUNTER -lt $MAXBIKES ]; do
-		sleep .15
+		sleep .25
 		
 		if [ $((COUNTER%2)) -eq 0 ]; then
 			HCIDEVICE="hci1";
@@ -79,22 +79,31 @@ function set_broadcast {
 		#echo ${powerArray[0]};
 		#echo ${powerArray[1]};
 
-		RPM=$(( $RANDOM % 100 + 60 ));
+		RPM=$(( $RANDOM % 400 + 400 ));
+		
 		RPM_hex=`printf "%04X" $RPM`;
 		RPM_hex=`printf $RPM_hex | sed 's/../& /g'`;
 		#echo $RPM_hex;
+
+
 
 		rpmArray=($RPM_hex);
 		#echo ${rpmArray[0]};
 		#echo ${rpmArray[1]};
 
 
-		hcitool -i $HCIDEVICE cmd 0x08 0x0008 1C 03 09 4D 33 02 01 04 14 FF 02 01 $MAJOR $MINOR $DATATYPE $BIKEID_hex ${rpmArray[1]} ${rpmArray[0]} $HR ${powerArray[1]} ${powerArray[0]} $KCAL $MINUTES $SECS $TRIP $GEAR_hex > /dev/null;
+		hcitool -i $HCIDEVICE cmd 0x08 0x0008 1C 03 09 4D 33 02 01 04 14 FF 02 01 $MAJOR $MINOR $DATATYPE $BIKEID_hex ${rpmArray[1]} ${rpmArray[0]}  $HR ${powerArray[1]} ${powerArray[0]} $KCAL $MINUTES $SECS $TRIP $GEAR_hex > /dev/null;
 
+	echo " HCI:" $HCIDEVICE cmd 0x08 0x0008 1C 03 09 4D 33 02 01 04 14 FF 02 01 " vMAJOR:"$MAJOR " vMINOR:"$MINOR " DATATYPE:"$DATATYPE ;
+	echo " Bike:"$BIKEID_hex " RPM:"${rpmArray[1]} ${rpmArray[0]} " POWER:"${powerArray[1]} ${powerArray[0]};
+	echo " KAL:"$KCAL " MINS:"$MINUTES " SECS:"$SECS " TRIP:"$TRIP " GEAR:"$GEAR_hex;
 	
-		echo $HCIDEVICE "Bike:"$BIKEID $BIKEID_hex " gear:"$GEAR $GEAR_hex " power:"$POWER"W" $POWER_hex " RPM:"$RPM $RPM_hex ;
+	echo "---------------";
+	echo $HCIDEVICE "Bike:"$BIKEID $BIKEID_hex "  RPM:"$RPM $RPM_hex " POWER:"$POWER $POWER_hex ;
+	echo "-------------------------------------------" 
 
-		let COUNTER=COUNTER+1;
+	let COUNTER=COUNTER+1;
+	
 	done
 }
 
